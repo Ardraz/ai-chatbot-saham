@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot Saham Indonesia</title>
+    <!-- Mengambil library Tailwind CSS secara langsung lewat internet (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library untuk merapikan format teks AI (Tebal, Tabel, dll) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        /* Desain Scrollbar khusus agar terlihat profesional dan tidak kaku */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col items-center justify-center p-4 md:p-8">
+    
+    <!-- Kotak Aplikasi Utama -->
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl flex flex-col h-full md:h-[90vh] overflow-hidden border border-gray-200">
+        
+        <!-- Header (Bagian Atas) -->
+        <header class="bg-blue-600 text-white p-4 flex items-center justify-between shadow-md z-10">
+            <div>
+                <h1 class="text-xl font-bold flex items-center gap-2">
+                    📈 Asisten AI Saham
+                </h1>
+                <p class="text-sm text-blue-100 mt-1">Data delay 15 menit | Objektif & Data-Driven</p>
+            </div>
+            <!-- Indikator Status -->
+            <div class="flex items-center gap-2 text-sm bg-blue-700 px-3 py-1 rounded-full">
+                <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                Online
+            </div>
+        </header>
+
+        <!-- Area Obrolan (Tengah) -->
+        <main id="chat-box" class="flex-1 p-4 overflow-y-auto bg-slate-50 flex flex-col gap-6">
+            
+            <!-- Pesan Pembuka dari AI -->
+            <div class="flex gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center flex-shrink-0 text-xl">
+                    🤖
+                </div>
+                <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 max-w-[85%] md:max-w-[75%]">
+                    <p class="text-gray-700 leading-relaxed">
+                        Halo! Saya adalah <strong>Asisten AI Saham Indonesia</strong>. Anda bisa bertanya tentang:
+                    </p>
+                    <ul class="list-disc ml-5 mt-2 text-gray-700 text-sm">
+                        <li>Harga saham hari ini (misal: "Berapa harga BBCA?")</li>
+                        <li>Analisis Fundamental (misal: "Gimana fundamental BBRI?")</li>
+                        <li>Kondisi valuasi perusahaan.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Area Input (Bawah) -->
+        <footer class="p-4 bg-white border-t border-gray-200 flex gap-3">
+            <input type="text" id="user-input" class="flex-1 bg-gray-50 border border-gray-300 text-gray-800 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-3 transition-colors" placeholder="Ketik pertanyaan saham Anda di sini..." autocomplete="off">
+            <button id="send-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-sm px-6 py-3 transition-colors shadow-sm flex items-center justify-center gap-2">
+                <span>Kirim</span>
+                <!-- Ikon Pesawat Kertas -->
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            </button>
+        </footer>
+    </div>
+<!-- ... (kode HTML footer/tombol kirim Anda sebelumnya) ... -->
+    </div> <!-- Ini adalah penutup div kotak utama -->
+
+    <!-- SCRIPT JAVASCRIPT DIMULAI DI SINI -->
+    <script>
+        // 1. Menangkap elemen-elemen penting dari HTML
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // 2. Fungsi untuk menggulir layar chat ke paling bawah secara otomatis
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // 3. Fungsi untuk menambahkan gelembung chat ke layar
+        function appendMessage(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex gap-3 ' + (sender === 'user' ? 'flex-row-reverse' : '');
+
+            // Desain Avatar (Robot atau User)
+            const avatar = document.createElement('div');
+            avatar.className = `w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-xl border ${sender === 'user' ? 'bg-blue-600 border-blue-700 text-white' : 'bg-blue-100 border-blue-200'}`;
+            avatar.innerHTML = sender === 'user' ? '👤' : '🤖';
+
+            // Desain Kotak Pesan
+            const bubble = document.createElement('div');
+            bubble.className = `p-4 shadow-sm border max-w-[85%] md:max-w-[75%] prose prose-sm md:prose-base ${sender === 'user' ? 'bg-blue-50 border-blue-100 rounded-2xl rounded-tr-none text-gray-800' : 'bg-white border-gray-100 rounded-2xl rounded-tl-none text-gray-700'}`;
+            
+            // Jika pesan dari AI, gunakan marked.js untuk merender teks tebal/tabel. Jika user, teks biasa.
+            if (sender === 'ai') {
+                bubble.innerHTML = marked.parse(message);
+            } else {
+                bubble.textContent = message;
+            }
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            chatBox.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // 4. Fungsi untuk menampilkan animasi loading "AI sedang mengetik..."
+        function showLoading() {
+            const loadingId = 'loading-indicator';
+            if (document.getElementById(loadingId)) return; // Jangan buat dobel
+
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = loadingId;
+            loadingDiv.className = 'flex gap-3';
+            loadingDiv.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center flex-shrink-0 text-xl">🤖</div>
+                <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 flex items-center gap-2">
+                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                </div>
+            `;
+            chatBox.appendChild(loadingDiv);
+            scrollToBottom();
+        }
+
+        function hideLoading() {
+            const loadingDiv = document.getElementById('loading-indicator');
+            if (loadingDiv) loadingDiv.remove();
+        }
+
+        // 5. Fungsi Utama untuk Mengirim Pesan ke Backend FastAPI
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return; // Jangan kirim jika input kosong
+
+            // Tampilkan pesan user di UI dan kosongkan kotak input
+            appendMessage('user', text);
+            userInput.value = '';
+            
+            // Tampilkan animasi loading
+            showLoading();
+
+            try {
+                // Mengirim request ke Backend kita (Metode POST)
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pesan: text })
+                });
+
+                const data = await response.json();
+                
+                hideLoading(); // Matikan animasi loading
+                
+                if (data.status === 'sukses') {
+                    appendMessage('ai', data.jawaban_ai);
+                } else {
+                    appendMessage('ai', 'Maaf, terjadi kesalahan sistem: ' + (data.pesan || 'Error tidak diketahui'));
+                }
+            } catch (error) {
+                hideLoading();
+                appendMessage('ai', 'Maaf, tidak dapat terhubung ke server. Periksa koneksi Anda.');
+            }
+        }
+
+        // 6. Mengaktifkan Tombol Kirim dan Tombol 'Enter' di keyboard
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

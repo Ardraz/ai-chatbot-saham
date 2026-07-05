@@ -1,0 +1,10 @@
+# Mengabaikan file rahasia
+.env
+
+# Mengabaikan file cache Python (agar repo GitHub tidak kotor)
+__pycache__/
+*.pyc
+
+# Mengabaikan folder virtual environment (jika ada yang pakai lokal)
+venv/
+env/
